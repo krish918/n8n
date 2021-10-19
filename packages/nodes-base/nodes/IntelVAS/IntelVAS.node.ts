@@ -45,31 +45,36 @@ export class IntelVAS implements INodeType {
 
 			properties: [
 				{
-					displayName: 'VAS Pipeline',
-					name: 'pipeline',
-					type: 'options',
+					displayName : 'VAS Pipeline',
+					name : 'pipeline',
+					type : 'options',
 
 					options: [
 						{
-							name: 'Detect Audio',
-							value: 'audio_detection',
-							description: 'Environmental sound detection based on Aclnet',
+							name : 'Detect Person-Vehicle-Bike',
+							value : 'person_vehicle_bike',
+							description : 'Based on person-vehicle-bike-detection-crossroad-0078',
 						},
 						{
-							name: 'Detect Person-Vehicle-Bike',
-							value: 'person_vehicle_bike',
-							description: 'Based on person-vehicle-bike-detection-crossroad-0078',
+							name : 'Classify Vehicle Attributes',
+							value : 'object_classification',
+							description : 'Based on person-vehicle-bike-detection-crossroad-0078 and vehicle-attributes-recognition-barrier-0039',
 						},
 						{
-							name: 'Track Line Crossing',
-							value: 'object_line_crossing',
-							description: 'Object Tracking pipeline with Line Crossing Tracking module',
+							name : 'Recognise Actions',
+							value : 'action_recognition',
+							description : 'General action recognition based on action-recognition-0001',
 						},
 						{
-							name: 'Classify vehicle attributes',
-							value: 'object_classification',
-							description: 'Based on person-vehicle-bike-detection-crossroad-0078 and vehicle-attributes-recognition-barrier-0039',
-						}
+							name : 'Track Line Crossing',
+							value : 'object_line_crossing',
+							description : 'Object Tracking pipeline with Line Crossing Tracking module',
+						},
+						{
+							name : 'Detect Audio',
+							value : 'audio_detection',
+							description : 'Environmental sound detection based on Aclnet',
+						},
 					],
 
 					default: '',
@@ -86,6 +91,7 @@ export class IntelVAS implements INodeType {
 						show: {
 							pipeline: [
 								'audio_detection', 'person_vehicle_bike', 'object_line_crossing','object_classification',
+								'action_recognition',
 							]
 						}
 					},
@@ -110,7 +116,6 @@ export class IntelVAS implements INodeType {
 
 					default: '',
 					description: 'The operation to be performed on selected pipeline.',
-
 				},
 
 				{
@@ -207,7 +212,6 @@ export class IntelVAS implements INodeType {
 						}
 					],
 				}
-
 			],
 	};
 
@@ -261,6 +265,10 @@ export class IntelVAS implements INodeType {
 
 				case 'object_classification':
 					return 'object_classification/vehicle_attributes' as string;
+					break;
+
+				case 'action_recognition':
+					return 'action_recognition/general' as string;
 					break;
 
 				default:
@@ -416,7 +424,7 @@ export class IntelVAS implements INodeType {
 			 * */
 			if (operation === 'start') {
 				const json_response = {
-					instance_id : api_response,
+					id : api_response,
 					instance_status : 'CREATED',
 				}
 
