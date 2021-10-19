@@ -1,0 +1,121 @@
+{
+    "id": 12,
+    "name": "if-object-is-person",
+    "active": false,
+    "nodes": [
+        {
+            "parameters": {},
+            "name": "Start",
+            "type": "n8n-nodes-base.start",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "topics": "vaserving/action",
+                "options": {
+                    "jsonParseBody": true,
+                    "onlyMessage": true
+                }
+            },
+            "name": "MQTT Trigger",
+            "type": "n8n-nodes-base.mqttTrigger",
+            "typeVersion": 1,
+            "position": [
+                530,
+                300
+            ],
+            "credentials": {
+                "mqtt": "MQTT account"
+            }
+        },
+        {
+            "parameters": {
+                "resource": "playlist",
+                "operation": "create",
+                "name": "={{$json[\"objects\"][0][\"tensors\"][0][\"label\"]}}",
+                "additionalFields": {}
+            },
+            "name": "Spotify",
+            "type": "n8n-nodes-base.spotify",
+            "typeVersion": 1,
+            "position": [
+                1010,
+                140
+            ],
+            "credentials": {
+                "spotifyOAuth2Api": "Spotify account"
+            }
+        },
+        {
+            "parameters": {
+                "webhookUri": "https://discord.com/api/webhooks/898143911510425640/Aq6xWJXQGoJS9Y3w_P3GRgePDiExHvihd1kC2G-2a-ApoXGpfK1mNeFDZq1ECwJtCj2D",
+                "text": "=Action: {{$json[\"objects\"][0][\"tensors\"][0][\"label\"]}}\ntimestamp : {{$json[\"timestamp\"]}}\nsource: {{$json[\"source\"]}}"
+            },
+            "name": "Discord",
+            "type": "n8n-nodes-base.discord",
+            "typeVersion": 1,
+            "position": [
+                1010,
+                420
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{$json[\"objects\"][0][\"tensors\"][0][\"label\"]}}",
+                            "value2": "playing violin"
+                        }
+                    ]
+                }
+            },
+            "name": "If playing violin",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                760,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "MQTT Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "If playing violin",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "If playing violin": {
+            "main": [
+                [
+                    {
+                        "node": "Spotify",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Discord",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "createdAt": "2021-10-14T09:55:39.365Z",
+    "updatedAt": "2021-10-14T11:16:15.989Z",
+    "settings": {},
+    "staticData": null
+}

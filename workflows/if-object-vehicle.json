@@ -1,0 +1,89 @@
+{
+    "id": 11,
+    "name": "if-object-is vehicle",
+    "active": true,
+    "nodes": [
+        {
+            "parameters": {},
+            "name": "Start",
+            "type": "n8n-nodes-base.start",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "webhookUri": "https://discord.com/api/webhooks/898109861605290014/G1xiGrBoK3xqChkAXUwMvGbnDJgEHyuqzyFKHJZsuBfCWX4uCul8tiR_4dDIQDX2vqtg",
+                "text": "={{$json[\"msg\"]}}"
+            },
+            "name": "Send info to Discord channel",
+            "type": "n8n-nodes-base.discord",
+            "typeVersion": 1,
+            "position": [
+                1080,
+                310
+            ]
+        },
+        {
+            "parameters": {
+                "functionCode": "let msg;\nfor (item of items) {\n  if (item.json.objects[0].color.label === 'white') {\n    msg = \"Person 1 with white car arriving!\";\n  }\n  else if(item.json.objects[0].color.label === 'red') {\n    msg = \"Person 2 with red car arriving!\";\n  }\n  else {\n    msg = \"Unknown person arriving!\";\n  }\n  \n  item.json.msg = msg;\n}\n\n// You can write logs to the browser console\nconsole.log('Done!');\n\nreturn items;"
+            },
+            "name": "if vehicle is red or white",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                780,
+                310
+            ]
+        },
+        {
+            "parameters": {
+                "topics": "vaserving/classify",
+                "options": {
+                    "jsonParseBody": true,
+                    "onlyMessage": true
+                }
+            },
+            "name": "On Vehicle Classification",
+            "type": "n8n-nodes-base.mqttTrigger",
+            "typeVersion": 1,
+            "position": [
+                490,
+                310
+            ],
+            "credentials": {
+                "mqtt": "MQTT account"
+            }
+        }
+    ],
+    "connections": {
+        "if vehicle is red or white": {
+            "main": [
+                [
+                    {
+                        "node": "Send info to Discord channel",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "On Vehicle Classification": {
+            "main": [
+                [
+                    {
+                        "node": "if vehicle is red or white",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "createdAt": "2021-10-14T05:58:08.442Z",
+    "updatedAt": "2021-10-14T08:03:14.464Z",
+    "settings": {},
+    "staticData": null
+}

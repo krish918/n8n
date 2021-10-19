@@ -1,0 +1,178 @@
+{
+    "id": 9,
+    "name": "vas-conditional-multiple-nodes",
+    "active": false,
+    "nodes": [
+        {
+            "parameters": {},
+            "name": "Start",
+            "type": "n8n-nodes-base.start",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "topics": "vaserving/multi",
+                "options": {
+                    "jsonParseBody": true,
+                    "onlyMessage": true
+                }
+            },
+            "name": "On Object Detection",
+            "type": "n8n-nodes-base.mqttTrigger",
+            "typeVersion": 1,
+            "position": [
+                420,
+                310
+            ],
+            "credentials": {
+                "mqtt": "MQTT account"
+            }
+        },
+        {
+            "parameters": {
+                "chatId": "-617594249",
+                "text": "=Detected Object : {{$json[\"objects\"][0][\"detection\"][\"label\"]}}\nVideo URI : {{$json[\"source\"].slice(0, -9)}}\nConfidence : {{(parseFloat($json[\"objects\"][0][\"detection\"][\"confidence\"] )* 100).toFixed(2) }}%",
+                "additionalFields": {
+                    "disable_web_page_preview": true
+                }
+            },
+            "name": "Detection info to telegram",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1,
+            "position": [
+                690,
+                130
+            ],
+            "credentials": {
+                "telegramApi": "Telegram account"
+            }
+        },
+        {
+            "parameters": {
+                "pipeline": "action_recognition",
+                "operation": "start",
+                "uri": "={{$json[\"source\"]}}",
+                "parameters": {
+                    "inference_interval": "300",
+                    "threshold": "0.5"
+                }
+            },
+            "name": "Person - Recognise Action",
+            "type": "n8n-nodes-base.intelvas",
+            "typeVersion": 1,
+            "position": [
+                990,
+                340
+            ],
+            "credentials": {
+                "intelVASApi": "Intel VAS account 4"
+            }
+        },
+        {
+            "parameters": {
+                "pipeline": "object_classification",
+                "operation": "start",
+                "uri": "={{$json[\"source\"]}}",
+                "parameters": {
+                    "inference_interval": "25"
+                }
+            },
+            "name": "Vehicle - Classify on color",
+            "type": "n8n-nodes-base.intelvas",
+            "typeVersion": 1,
+            "position": [
+                980,
+                160
+            ],
+            "credentials": {
+                "intelVASApi": "Intel VAS account 2"
+            }
+        },
+        {
+            "parameters": {},
+            "name": "Others - Do Nothing",
+            "type": "n8n-nodes-base.noOp",
+            "typeVersion": 1,
+            "position": [
+                960,
+                530
+            ]
+        },
+        {
+            "parameters": {
+                "dataType": "string",
+                "value1": "={{$json[\"objects\"][0][\"detection\"][\"label\"]}}",
+                "rules": {
+                    "rules": [
+                        {
+                            "value2": "vehicle"
+                        },
+                        {
+                            "value2": "person",
+                            "output": 1
+                        }
+                    ]
+                },
+                "fallbackOutput": 2
+            },
+            "name": "Switch on detected object",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 1,
+            "position": [
+                690,
+                350
+            ]
+        }
+    ],
+    "connections": {
+        "On Object Detection": {
+            "main": [
+                [
+                    {
+                        "node": "Detection info to telegram",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Switch on detected object",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Switch on detected object": {
+            "main": [
+                [
+                    {
+                        "node": "Vehicle - Classify on color",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Person - Recognise Action",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Others - Do Nothing",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "createdAt": "2021-10-13T19:03:24.125Z",
+    "updatedAt": "2021-10-14T10:42:50.257Z",
+    "settings": {},
+    "staticData": null
+}
