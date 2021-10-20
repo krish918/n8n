@@ -227,7 +227,7 @@ export class IntelVAS implements INodeType {
 		 * on both machines. If var is not set we consider MQTT to be
 		 * running on localhost.
 		 */
-		const MQTT_HOST = ("N8N_HOST" in process.env) ? process.env.N8N_HOST : "localhost";
+		const MQTT_HOST = ("MQTT_HOST" in process.env) ? process.env.MQTT_HOST : "localhost";
 
 
 		/**
