@@ -10,7 +10,7 @@ import {
 } from 'n8n-workflow';
 
 import {
-OptionsWithUri,
+	OptionsWithUri,
 } from 'request';
 
 export class IntelVAS implements INodeType {
@@ -220,11 +220,15 @@ export class IntelVAS implements INodeType {
 	*/
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 
-		/*
-		* Hard-coding the MQTT host, as a workaround for docker windows issues on
-		* developer machine.
-		*/
-		const MQTT_HOST = "host.docker.internal" as string;
+		/**
+		 * We have different hostname for MQTT broker on dev machine
+		 * and VM instance. Hence, we use environment vars to get
+		 * appropriate hostname for both machines. We set N8N_HOST var
+		 * on both machines. If var is not set we consider MQTT to be
+		 * running on localhost.
+		 */
+		const MQTT_HOST = ("N8N_HOST" in process.env) ? process.env.N8N_HOST : "localhost";
+
 
 		/**
 		 * Getting the input from previous n8n nodes, in case current node has
