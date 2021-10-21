@@ -421,7 +421,7 @@ export class IntelVAS implements INodeType {
 			// send the request and receive response by VAS API in 'api_response'
 			api_response = await this.helpers.request(request_to_rest_api);
 
-
+			console.log(typeof api_response);
 			/**
 			 * If operation was to start pipeline, then, api_response is a mere integer,
 			 * which is the instance_id. Format the response and add some human-readable info.
@@ -434,6 +434,11 @@ export class IntelVAS implements INodeType {
 
 				api_response = json_response;
 			}
+			else {
+				api_response = JSON.parse(api_response);
+			}
+
+			console.log(typeof api_response);
 
 			/**
 			 * If operation was to stop pipeline, then, api_response merely
