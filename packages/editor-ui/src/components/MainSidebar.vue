@@ -58,19 +58,19 @@
 					<n8n-menu-item index="workflow-download">
 						<template slot="title">
 							<font-awesome-icon icon="file-download"/>
-							<span slot="title" class="item-title">Download workflow</span>
+							<span slot="title" class="item-title">Download Workflow</span>
 						</template>
 					</n8n-menu-item>
 					<n8n-menu-item index="workflow-download-package">
 						<template slot="title">
 							<font-awesome-icon icon="box-open"/>
-							<span slot="title" class="item-title">Download package</span>
+							<span slot="title" class="item-title">Download Package</span>
 						</template>
 					</n8n-menu-item>
 					<n8n-menu-item index="workflow-container">
 						<template slot="title">
-							<font-awesome-icon icon="docker"/>
-							<span slot="title" class="item-title">Bring your own container</span>
+							<font-awesome-icon :icon="['fab','docker']"/>
+							<span slot="title" class="item-title">Bring Your Own Container</span>
 						</template>
 					</n8n-menu-item>
 					<n8n-menu-item index="workflow-import-url">
