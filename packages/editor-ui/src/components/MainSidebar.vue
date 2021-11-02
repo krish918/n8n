@@ -58,7 +58,19 @@
 					<n8n-menu-item index="workflow-download">
 						<template slot="title">
 							<font-awesome-icon icon="file-download"/>
-							<span slot="title" class="item-title">Download</span>
+							<span slot="title" class="item-title">Download workflow</span>
+						</template>
+					</n8n-menu-item>
+					<n8n-menu-item index="workflow-download-package">
+						<template slot="title">
+							<font-awesome-icon icon="box-open"/>
+							<span slot="title" class="item-title">Download package</span>
+						</template>
+					</n8n-menu-item>
+					<n8n-menu-item index="workflow-container">
+						<template slot="title">
+							<font-awesome-icon icon="docker"/>
+							<span slot="title" class="item-title">Bring your own container</span>
 						</template>
 					</n8n-menu-item>
 					<n8n-menu-item index="workflow-import-url">
@@ -482,6 +494,7 @@ export default mixins(
 <style lang="scss">
 .sidebar-popper{
 	.el-menu-item {
+		width: 250px;
 		font-size: 0.9em;
 		height: 35px;
 		line-height: 35px;
@@ -654,6 +667,7 @@ a.logo {
 	}
 
 	ul {
+		max-width:280px;
 		display: flex;
 		flex-direction: column;
 	}

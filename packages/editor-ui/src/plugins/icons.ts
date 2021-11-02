@@ -84,7 +84,9 @@ import {
 	faTrash,
 	faUndo,
 	faUsers,
+	faBoxOpen,
 } from '@fortawesome/free-solid-svg-icons';
+import { faDocker } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 library.add(faAngleDoubleLeft);
@@ -169,6 +171,8 @@ library.add(faTimes);
 library.add(faTrash);
 library.add(faUndo);
 library.add(faUsers);
+library.add(faBoxOpen);
+library.add(faDocker);
 
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 

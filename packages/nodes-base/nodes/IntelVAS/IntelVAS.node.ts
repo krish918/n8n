@@ -219,17 +219,6 @@ export class IntelVAS implements INodeType {
 	* Method to be executed each time an IntelVAS node is executed.
 	*/
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-
-		/**
-		 * We have different hostname for MQTT broker on dev machine
-		 * and VM instance. Hence, we use environment vars to get
-		 * appropriate hostname for both machines. We set N8N_HOST var
-		 * on both machines. If var is not set we consider MQTT to be
-		 * running on localhost.
-		 */
-		const MQTT_HOST = ("MQTT_HOST" in process.env) ? process.env.MQTT_HOST : "localhost";
-
-
 		/**
 		 * Getting the input from previous n8n nodes, in case current node has
 		 * to be executed for each item in a list being forwarded by previous
@@ -243,6 +232,17 @@ export class IntelVAS implements INodeType {
 
 		// getting credentials provided by user as an object
 		const credentials = await this.getCredentials ('intelVASApi') as IDataObject;
+
+			/**
+		 * We have different hostname for MQTT broker on dev machine
+		 * and VM instance. Hence, we use environment vars to get
+		 * appropriate hostname for both machines. We set MQTT_HOST var
+		 * on both machines. If var is not set we consider MQTT to be
+		 * running on same host, on which VAS is running.
+		 */
+
+		const MQTT_HOST = ("MQTT_HOST" in process.env) ? process.env.MQTT_HOST : credentials.vas_host;
+		console.log(MQTT_HOST);
 
 		let api_response;	// stores response data from VAS API
 		let node_response = []; // stores the n8n node output, displayed to user after execution finishes.
