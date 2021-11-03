@@ -52,7 +52,11 @@ import NoResults from './NoResults.vue';
 import SearchBar from './SearchBar.vue';
 import SubcategoryPanel from './SubcategoryPanel.vue';
 import { INodeCreateElement, INodeItemProps, ISubcategoryItemProps } from '@/Interface';
-import { ALL_NODE_FILTER, CORE_NODES_CATEGORY, REGULAR_NODE_FILTER, TRIGGER_NODE_FILTER } from '@/constants';
+import {
+	ALL_NODE_FILTER, CORE_NODES_CATEGORY,
+	INTEL_NODES_CATEGORY, REGULAR_NODE_FILTER,
+	TRIGGER_NODE_FILTER
+	} from '@/constants';
 import SlideTransition from '../transitions/SlideTransition.vue';
 import { matchesNodeType, matchesSelectType } from './helpers';
 
@@ -280,7 +284,7 @@ export default mixins(externalHooks).extend({
 	async mounted() {
 		this.$nextTick(() => {
 			// initial opening effect
-			this.activeCategory = [CORE_NODES_CATEGORY];
+			this.activeCategory = [INTEL_NODES_CATEGORY];
 		});
 		this.$externalHooks().run('nodeCreateList.mounted');
 	},
