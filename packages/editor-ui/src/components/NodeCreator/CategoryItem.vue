@@ -1,5 +1,4 @@
 <template functional>
-<div>
 	<div :class="$style.category">
 		<span :class="$style.name">{{ props.item.category }}</span>
 		<font-awesome-icon
@@ -9,17 +8,6 @@
 		/>
 		<font-awesome-icon :class="$style.arrow" icon="chevron-up" v-else />
 	</div>
-	<div :class="$style.category">
-		<span :class="$style.name">Intel node</span>
-		<font-awesome-icon
-			:class="$style.arrow"
-			icon="chevron-down"
-			v-if="props.item.properties.expanded"
-		/>
-		<font-awesome-icon :class="$style.arrow" icon="chevron-up" v-else />
-	</div>
-</div>
-
 </template>
 
 <script lang="ts">

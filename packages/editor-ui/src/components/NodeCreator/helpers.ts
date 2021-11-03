@@ -1,8 +1,9 @@
-import { CORE_NODES_CATEGORY, CUSTOM_NODES_CATEGORY, SUBCATEGORY_DESCRIPTIONS, UNCATEGORIZED_CATEGORY, UNCATEGORIZED_SUBCATEGORY, REGULAR_NODE_FILTER, TRIGGER_NODE_FILTER, ALL_NODE_FILTER, PERSONALIZED_CATEGORY  } from '@/constants';
+import { CORE_NODES_CATEGORY, INTEL_NODES_CATEGORY, CUSTOM_NODES_CATEGORY, SUBCATEGORY_DESCRIPTIONS, UNCATEGORIZED_CATEGORY, UNCATEGORIZED_SUBCATEGORY, REGULAR_NODE_FILTER, TRIGGER_NODE_FILTER, ALL_NODE_FILTER, PERSONALIZED_CATEGORY  } from '@/constants';
 import { INodeCreateElement, ICategoriesWithNodes, INodeItemProps } from '@/Interface';
 import { INodeTypeDescription } from 'n8n-workflow';
 
 const addNodeToCategory = (accu: ICategoriesWithNodes, nodeType: INodeTypeDescription, category: string, subcategory: string) => {
+
 	if (!accu[category]) {
 		accu[category] = {};
 	}
@@ -35,6 +36,7 @@ const addNodeToCategory = (accu: ICategoriesWithNodes, nodeType: INodeTypeDescri
 
 export const getCategoriesWithNodes = (nodeTypes: INodeTypeDescription[], personalizedNodeTypes: string[]): ICategoriesWithNodes => {
 	const sorted = [...nodeTypes].sort((a: INodeTypeDescription, b: INodeTypeDescription) => a.displayName > b.displayName? 1 : -1);
+	//console.log(nodeTypes);
 	return sorted.reduce(
 		(accu: ICategoriesWithNodes, nodeType: INodeTypeDescription) => {
 			if (personalizedNodeTypes.includes(nodeType.name)) {
@@ -64,7 +66,7 @@ export const getCategoriesWithNodes = (nodeTypes: INodeTypeDescription[], person
 };
 
 const getCategories = (categoriesWithNodes: ICategoriesWithNodes): string[] => {
-	const excludeFromSort = [CORE_NODES_CATEGORY, CUSTOM_NODES_CATEGORY, UNCATEGORIZED_CATEGORY, PERSONALIZED_CATEGORY];
+	const excludeFromSort = [CORE_NODES_CATEGORY, INTEL_NODES_CATEGORY, CUSTOM_NODES_CATEGORY, UNCATEGORIZED_CATEGORY, PERSONALIZED_CATEGORY];
 	const categories = Object.keys(categoriesWithNodes);
 	const sorted = categories.filter(
 		(category: string) =>
@@ -72,15 +74,18 @@ const getCategories = (categoriesWithNodes: ICategoriesWithNodes): string[] => {
 	);
 	sorted.sort();
 
-	return [CORE_NODES_CATEGORY, CUSTOM_NODES_CATEGORY, PERSONALIZED_CATEGORY, ...sorted, UNCATEGORIZED_CATEGORY];
+	return [CORE_NODES_CATEGORY, INTEL_NODES_CATEGORY, CUSTOM_NODES_CATEGORY, PERSONALIZED_CATEGORY, ...sorted, UNCATEGORIZED_CATEGORY];
 };
 
 export const getCategorizedList = (categoriesWithNodes: ICategoriesWithNodes): INodeCreateElement[] => {
 	const categories = getCategories(categoriesWithNodes);
-
+	//console.log(categories);
 	return categories.reduce(
 		(accu: INodeCreateElement[], category: string) => {
+			//console.log(category);
+			//console.log(categoriesWithNodes);
 			if (!categoriesWithNodes[category]) {
+				//console.log(accu);
 				return accu;
 			}
 

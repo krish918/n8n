@@ -448,10 +448,10 @@ export default mixins(
 				} else if (key === 'workflow-download-package') {
 					window.open('/package.zip', '_blank');
 					this.$showMessage({
-								title: 'Package Download',
-								message: 'Package was downloaded succesfully!',
-								type: 'success',
-							});
+						title: 'Package Download',
+						message: 'Package was downloaded succesfully!',
+						type: 'success',
+					});
 				}
 				else if (key === 'workflow-new') {
 					const result = this.$store.getters.getStateIsDirty;
