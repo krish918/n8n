@@ -12,6 +12,9 @@ import {
 import {
 	OptionsWithUri,
 } from 'request';
+import { inherits } from 'util';
+
+const { spawn } = require('child_process');
 
 export class IntelVAS implements INodeType {
 
@@ -242,7 +245,6 @@ export class IntelVAS implements INodeType {
 		 */
 
 		const MQTT_HOST = ("MQTT_HOST" in process.env) ? process.env.MQTT_HOST : credentials.vas_host;
-		console.log(MQTT_HOST);
 
 		let api_response;	// stores response data from VAS API
 		let node_response = []; // stores the n8n node output, displayed to user after execution finishes.
@@ -328,6 +330,10 @@ export class IntelVAS implements INodeType {
 							host : mqtt_host_port,
 							topic : credentials.mqtt_topic,
 						},
+						frame : {
+							type : "rtsp",
+							path : "detection",
+						}
 					},
 
 					parameters : {}, // keep it empty. assign properties based on additional parameters.
@@ -380,8 +386,6 @@ export class IntelVAS implements INodeType {
 					uri : api_endpoint,
 					json : true,
 				} as OptionsWithUri;
-
-				console.log(body_payload);
 			}
 
 			/**
@@ -420,8 +424,6 @@ export class IntelVAS implements INodeType {
 
 			// send the request and receive response by VAS API in 'api_response'
 			api_response = await this.helpers.request(request_to_rest_api);
-
-			console.log(typeof api_response);
 			/**
 			 * If operation was to start pipeline, then, api_response is a mere integer,
 			 * which is the instance_id. Format the response and add some human-readable info.
@@ -433,12 +435,24 @@ export class IntelVAS implements INodeType {
 				}
 
 				api_response = json_response;
+
+				/**
+				 * if a pipleine has been started we also need to convert its RTSP stream output
+				 * to HTTP stream, so as to make ir viewable in grafana dashboard.
+				 */
+
+				/*await new Promise(resolve => setTimeout(resolve, 2000));*/
+
+				const vlc = spawn("vlc -vvv rtsp://localhost:8554/detection  --sout '#transcode{vcodec=MJPG,venc=ffmpeg{strict=1},fps=10}:standard{access=http{mime=multipart/x-mixed-replace;boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=:9999/}'",
+					{
+						stdio: 'inherit',
+						shell: true,
+					});
+
 			}
 			else {
 				api_response = JSON.parse(api_response);
 			}
-
-			console.log(typeof api_response);
 
 			/**
 			 * If operation was to stop pipeline, then, api_response merely
