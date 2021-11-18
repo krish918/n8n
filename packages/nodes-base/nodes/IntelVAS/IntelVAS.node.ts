@@ -314,7 +314,7 @@ export class IntelVAS implements INodeType {
 
 				// get additional parameters, if any.
 				const additional_field = this.getNodeParameter('parameters', i) as IDataObject;
-
+				console.log(mqtt_host_port);
 				/*
 				* Prepare the payload to be send as body parameter to start the pipeline.
 				* Format of paramters is based on REST API provided by VAS.
