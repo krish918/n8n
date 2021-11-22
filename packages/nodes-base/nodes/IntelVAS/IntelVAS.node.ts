@@ -314,7 +314,6 @@ export class IntelVAS implements INodeType {
 
 				// get additional parameters, if any.
 				const additional_field = this.getNodeParameter('parameters', i) as IDataObject;
-				console.log(mqtt_host_port);
 				/*
 				* Prepare the payload to be send as body parameter to start the pipeline.
 				* Format of paramters is based on REST API provided by VAS.
@@ -442,13 +441,13 @@ export class IntelVAS implements INodeType {
 				 */
 
 				/*await new Promise(resolve => setTimeout(resolve, 2000));*/
-				/*
+
 				const vlc = spawn("vlc -vvv rtsp://localhost:8554/detection  --sout '#transcode{vcodec=MJPG,venc=ffmpeg{strict=1},fps=10}:standard{access=http{mime=multipart/x-mixed-replace;boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=:9999/}'",
 					{
 						stdio: 'inherit',
 						shell: true,
 					});
-					*/
+
 			}
 			else {
 				api_response = JSON.parse(api_response);
