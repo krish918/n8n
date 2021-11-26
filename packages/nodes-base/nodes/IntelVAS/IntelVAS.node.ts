@@ -442,7 +442,7 @@ export class IntelVAS implements INodeType {
 
 				/*await new Promise(resolve => setTimeout(resolve, 2000));*/
 
-				const vlc = spawn("vlc -vvv rtsp://localhost:8554/detection  --sout '#transcode{vcodec=MJPG,venc=ffmpeg{strict=1},fps=15}:standard{access=http{mime=multipart/x-mixed-replace;boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=:9999/}'",
+				const vlc = spawn("vlc -vvv rtsp://localhost:8554/detection  --sout '#transcode{vcodec=MJPG,venc=ffmpeg{strict=1},fps=20}:standard{access=http{mime=multipart/x-mixed-replace;boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=:9999/}'",
 					{
 						stdio: 'inherit',
 						shell: true,

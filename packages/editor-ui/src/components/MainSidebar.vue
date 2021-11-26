@@ -64,13 +64,13 @@
 					<n8n-menu-item index="workflow-download-package">
 						<template slot="title">
 							<font-awesome-icon icon="box-open"/>
-							<span slot="title" class="item-title">Download Package</span>
+							<span slot="title" class="item-title">Download as Package</span>
 						</template>
 					</n8n-menu-item>
 					<n8n-menu-item index="workflow-container">
 						<template slot="title">
 							<font-awesome-icon :icon="['fab','docker']"/>
-							<span slot="title" class="item-title">Bring Your Own Container</span>
+							<span slot="title" class="item-title">Bring Your Own Service</span>
 						</template>
 					</n8n-menu-item>
 					<n8n-menu-item index="workflow-import-url">
