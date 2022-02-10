@@ -5,7 +5,7 @@ import {
 	INodeTypeDescription,
 	NodeOperationError,
 } from 'n8n-workflow';
-import { operationFields } from './Baserow/OperationDescription';
+import { operationFields } from '../Baserow/OperationDescription';
 
 const { NodeVM } = require('vm2');
 
