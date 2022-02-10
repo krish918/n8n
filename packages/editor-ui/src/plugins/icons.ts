@@ -90,7 +90,7 @@ import { faDocker } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 function addIcon(icon: any) { // tslint:disable-line:no-any
-	l(icIconon as IconDefinition);
+	library.add(icon as IconDefinition);
 }
 
 addIcon(faAngleDoubleLeft);
