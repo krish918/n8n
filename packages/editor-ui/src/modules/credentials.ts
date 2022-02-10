@@ -21,7 +21,7 @@ import {
 import {
 	ICredentialType,
 	ICredentialsDecrypted,
-	NodeCredentialTestResult,
+	INodeCredentialTestResult,
 	INodeTypeDescription,
 } from 'n8n-workflow';
 import { getAppNameFromCredType } from '@/components/helpers';
@@ -98,7 +98,7 @@ const module: Module<ICredentialsState, IRootState> = {
 		},
 		getCredentialsByType: (state: ICredentialsState, getters: any) => { // tslint:disable-line:no-any
 			return (credentialType: string): ICredentialsResponse[] => {
-				return getters.allCredentialsByType[credentialType];
+				return getters.allCredentialsByType[credentialType] || [];
 			};
 		},
 		getNodesWithAccess (state: ICredentialsState, getters: any, rootState: IRootState, rootGetters: any) { // tslint:disable-line:no-any
@@ -158,7 +158,7 @@ const module: Module<ICredentialsState, IRootState> = {
 		oAuth1Authorize: async (context: ActionContext<ICredentialsState, IRootState>, data: ICredentialsResponse) => {
 			return oAuth1CredentialAuthorize(context.rootGetters.getRestApiContext, data);
 		},
-		testCredential: async (context: ActionContext<ICredentialsState, IRootState>, data: ICredentialsDecrypted): Promise<NodeCredentialTestResult> => {
+		testCredential: async (context: ActionContext<ICredentialsState, IRootState>, data: ICredentialsDecrypted): Promise<INodeCredentialTestResult> => {
 			return testCredential(context.rootGetters.getRestApiContext, { credentials: data });
 		},
 		getNewCredentialName: async (context: ActionContext<ICredentialsState, IRootState>, params: { credentialTypeName: string }) => {

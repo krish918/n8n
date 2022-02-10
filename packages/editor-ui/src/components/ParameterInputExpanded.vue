@@ -1,8 +1,9 @@
 <template>
 	<n8n-input-label
-		:label="parameter.displayName"
-		:tooltipText="parameter.description"
+		:label="$locale.credText().inputLabelDisplayName(parameter)"
+		:tooltipText="$locale.credText().inputLabelDescription(parameter)"
 		:required="parameter.required"
+		:showTooltip="focused"
 	>
 		<parameter-input
 			:parameter="parameter"
@@ -12,27 +13,31 @@
 			:displayOptions="true"
 			:documentationUrl="documentationUrl"
 			:errorHighlight="showRequiredErrors"
-
+			:isForCredential="true"
+			@focus="onFocus"
 			@blur="onBlur"
 			@textInput="valueChanged"
 			@valueChanged="valueChanged"
 			inputSize="large"
 		/>
 		<div class="errors" v-if="showRequiredErrors">
-			This field is required. <a v-if="documentationUrl" :href="documentationUrl" target="_blank" @click="onDocumentationUrlClick">Open docs</a>
+			{{ $locale.baseText('parameterInputExpanded.thisFieldIsRequired') }} <a v-if="documentationUrl" :href="documentationUrl" target="_blank" @click="onDocumentationUrlClick">{{ $locale.baseText('parameterInputExpanded.openDocs') }}</a>
 		</div>
+		<input-hint :class="$style.hint" :hint="$locale.credText().hint(parameter)" />
 	</n8n-input-label>
 </template>
 
 <script lang="ts">
 import { IUpdateInformation } from '@/Interface';
 import ParameterInput from './ParameterInput.vue';
+import InputHint from './ParameterInputHint.vue';
 import Vue from 'vue';
 
 export default Vue.extend({
 	name: 'ParameterInputExpanded',
 	components: {
 		ParameterInput,
+		InputHint,
 	},
 	props: {
 		parameter: {
@@ -48,7 +53,8 @@ export default Vue.extend({
 	},
 	data() {
 		return {
-			blurred: false,
+			focused: false,
+			blurredEver: false,
 		};
 	},
 	computed: {
@@ -57,7 +63,7 @@ export default Vue.extend({
 				return false;
 			}
 
-			if (this.blurred || this.showValidationWarnings) {
+			if (this.blurredEver || this.showValidationWarnings) {
 				if (this.$props.parameter.type === 'string') {
 					return !this.value;
 				}
@@ -71,8 +77,12 @@ export default Vue.extend({
 		},
 	},
 	methods: {
+		onFocus() {
+			this.focused = true;
+		},
 		onBlur() {
-			this.blurred = true;
+			this.blurredEver = true;
+			this.focused = false;
 		},
 		valueChanged(parameterData: IUpdateInformation) {
 			this.$emit('change', parameterData);
@@ -87,3 +97,9 @@ export default Vue.extend({
 	},
 });
 </script>
+
+<style lang="scss" module>
+	.hint {
+		margin-top: var(--spacing-4xs);
+	}
+</style>
