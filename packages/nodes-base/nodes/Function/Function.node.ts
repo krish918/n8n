@@ -265,7 +265,23 @@ return res;
 		}
 
 		// Get the code to execute
-		const functionCode = this.getNodeParameter('functionCode', 0) as string;
+		let functionCode;
+
+		//get the node parameter - operation
+		const operation = this.getNodeParameter('operation', 0) as string;
+
+		if (operation === 'count_people') {
+			functionCode = this.getNodeParameter('functionCodePeople', 0) as string;
+		}
+		else if (operation === 'count_vehicles') {
+			functionCode = this.getNodeParameter('functionCodeVehicle', 0) as string;
+		}
+		else if (operation === 'count_bikes') {
+			functionCode = this.getNodeParameter('functionCodeBike', 0) as string;
+		}
+		else {
+			functionCode = this.getNodeParameter('functionCodeCustom', 0) as string;
+		}
 
 		try {
 			// Execute the function code
