@@ -57,7 +57,19 @@
 					<n8n-menu-item index="workflow-download">
 						<template slot="title">
 							<font-awesome-icon icon="file-download"/>
-							<span slot="title" class="item-title">{{ $locale.baseText('mainSidebar.download') }}</span>
+							<span slot="title" class="item-title">Download Workflow</span>
+						</template>
+					</n8n-menu-item>
+					<n8n-menu-item index="workflow-download-package">
+						<template slot="title">
+							<font-awesome-icon icon="box-open"/>
+							<span slot="title" class="item-title">Download as Package</span>
+						</template>
+					</n8n-menu-item>
+					<n8n-menu-item index="workflow-container">
+						<template slot="title">
+							<font-awesome-icon :icon="['fab','docker']"/>
+							<span slot="title" class="item-title">Bring Your Own Service</span>
 						</template>
 					</n8n-menu-item>
 					<n8n-menu-item index="workflow-import-url">
@@ -456,7 +468,15 @@ export default mixins(
 					this.trackHelpItemClick('about');
 				} else if (key === 'workflow-settings') {
 					this.$store.dispatch('ui/openModal', WORKFLOW_SETTINGS_MODAL_KEY);
-				} else if (key === 'workflow-new') {
+				} else if (key === 'workflow-download-package') {
+					window.open('/package.zip', '_blank');
+					this.$showMessage({
+						title: 'Package Download',
+						message: 'Package was downloaded succesfully!',
+						type: 'success',
+					});
+				}
+				else if (key === 'workflow-new') {
 					const result = this.$store.getters.getStateIsDirty;
 					if(result) {
 						const importConfirm = await this.confirmMessage(
@@ -511,6 +531,7 @@ export default mixins(
 <style lang="scss">
 .sidebar-popper{
 	.el-menu-item {
+		width: 250px;
 		font-size: 0.9em;
 		height: 35px;
 		line-height: 35px;
@@ -683,6 +704,7 @@ a.logo {
 	}
 
 	ul {
+		max-width:280px;
 		display: flex;
 		flex-direction: column;
 	}

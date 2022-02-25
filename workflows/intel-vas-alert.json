@@ -1,0 +1,248 @@
+{
+    "id": 8,
+    "name": "vas-send-alert-on-error",
+    "active": false,
+    "nodes": [
+        {
+            "parameters": {},
+            "name": "Start",
+            "type": "n8n-nodes-base.start",
+            "typeVersion": 1,
+            "position": [
+                100,
+                530
+            ]
+        },
+        {
+            "parameters": {
+                "functionCode": "const wait_time = 3000;\nreturn new Promise((resolve) => {\n  setTimeout(() => {resolve(items);}, wait_time);\n});"
+            },
+            "name": "Wait 3 sec",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                720,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "pipeline": "person_vehicle_bike",
+                "operation": "start",
+                "uri": "https://github.com/intel-iot-devkit/sample-videos/raw/master/one-by-one-person-detection.mp4?raw=true",
+                "parameters": {
+                    "inference_interval": "50",
+                    "threshold": "0.8"
+                }
+            },
+            "name": "Start Object Detection",
+            "type": "n8n-nodes-base.intelvas",
+            "typeVersion": 1,
+            "position": [
+                490,
+                300
+            ],
+            "credentials": {
+                "intelVASApi": "Intel VAS account 3"
+            }
+        },
+        {
+            "parameters": {
+                "pipeline": "person_vehicle_bike",
+                "operation": "status",
+                "instance_id": "={{$json[\"id\"]}}"
+            },
+            "name": "Get pipeline status",
+            "type": "n8n-nodes-base.intelvas",
+            "typeVersion": 1,
+            "position": [
+                960,
+                300
+            ],
+            "credentials": {
+                "intelVASApi": "Intel VAS account 3"
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{$json[\"state\"]}}",
+                            "value2": "=QUEUED"
+                        }
+                    ],
+                    "number": [
+                        {
+                            "value1": "={{$runIndex}}",
+                            "operation": "smallerEqual",
+                            "value2": 10
+                        }
+                    ]
+                }
+            },
+            "name": "If status is QUEUED",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                720,
+                540
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{$json[\"state\"]}}",
+                            "value2": "ERROR"
+                        }
+                    ]
+                }
+            },
+            "name": "If status is ERROR",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                1040,
+                560
+            ]
+        },
+        {
+            "parameters": {
+                "message": "=Intel VAS Pipeline: Instance {{$json[\"id\"]}} has encountered some error.",
+                "additionalFields": {}
+            },
+            "name": "SIGNL4",
+            "type": "n8n-nodes-base.signl4",
+            "typeVersion": 1,
+            "position": [
+                1310,
+                370
+            ],
+            "credentials": {
+                "signl4Api": "SIGNL4 Webhook account"
+            }
+        },
+        {
+            "parameters": {},
+            "name": "Do Nothing",
+            "type": "n8n-nodes-base.noOp",
+            "typeVersion": 1,
+            "position": [
+                1310,
+                670
+            ]
+        },
+        {
+            "parameters": {
+                "functionCode": "return [\n {\n  json : {\n    uri : \"https://github.com/intel-iot-devkit/sample-videos/blob/master/car-detection.mp4?raw=true\",\n    }\n  },\n {\n  json : {\n    uri : \"https://github.com/intel-iot-devkit/sample-videos/blob/master/one-by-one-person-detection.mp4?raw=true\",\n    }\n  }\n];\n"
+            },
+            "name": "Function",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                320,
+                420
+            ],
+            "disabled": true
+        }
+    ],
+    "connections": {
+        "Start": {
+            "main": [
+                [
+                    {
+                        "node": "Function",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Wait 3 sec": {
+            "main": [
+                [
+                    {
+                        "node": "Get pipeline status",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Start Object Detection": {
+            "main": [
+                [
+                    {
+                        "node": "Wait 3 sec",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get pipeline status": {
+            "main": [
+                [
+                    {
+                        "node": "If status is QUEUED",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "If status is QUEUED": {
+            "main": [
+                [
+                    {
+                        "node": "Wait 3 sec",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "If status is ERROR",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "If status is ERROR": {
+            "main": [
+                [
+                    {
+                        "node": "SIGNL4",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Do Nothing",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Function": {
+            "main": [
+                [
+                    {
+                        "node": "Start Object Detection",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "createdAt": "2021-10-13T12:17:45.311Z",
+    "updatedAt": "2021-10-14T10:32:08.545Z",
+    "settings": {},
+    "staticData": null
+}

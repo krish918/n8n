@@ -84,7 +84,9 @@ import {
 	faTrash,
 	faUndo,
 	faUsers,
+	faBoxOpen,
 } from '@fortawesome/free-solid-svg-icons';
+import { faDocker } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 function addIcon(icon: any) { // tslint:disable-line:no-any
@@ -173,6 +175,8 @@ addIcon(faTimes);
 addIcon(faTrash);
 addIcon(faUndo);
 addIcon(faUsers);
+addIcon(faBoxOpen);
+addIcon(faDocker);
 
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 

@@ -1,0 +1,120 @@
+{
+    "id": 4,
+    "name": "VAS-to-Airtable",
+    "active": true,
+    "nodes": [
+        {
+            "parameters": {},
+            "name": "Start",
+            "type": "n8n-nodes-base.start",
+            "typeVersion": 1,
+            "position": [
+                -50,
+                290
+            ]
+        },
+        {
+            "parameters": {
+                "topics": "=vaserving",
+                "options": {
+                    "jsonParseBody": true,
+                    "onlyMessage": true
+                }
+            },
+            "name": "MQTT Trigger",
+            "type": "n8n-nodes-base.mqttTrigger",
+            "typeVersion": 1,
+            "position": [
+                270,
+                290
+            ],
+            "credentials": {
+                "mqtt": "MQTT account"
+            }
+        },
+        {
+            "parameters": {
+                "keepOnlySet": true,
+                "values": {
+                    "string": [
+                        {
+                            "name": "Source URI",
+                            "value": "={{$json[\"source\"]}}"
+                        },
+                        {
+                            "name": "Label",
+                            "value": "={{$json[\"objects\"][0][\"detection\"][\"label\"]}}"
+                        }
+                    ],
+                    "number": [
+                        {
+                            "name": "Confidence",
+                            "value": "={{$json[\"objects\"][0][\"detection\"][\"confidence\"]}}"
+                        },
+                        {
+                            "name": "Timestamp",
+                            "value": "={{$json[\"timestamp\"]}}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Set",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 1,
+            "position": [
+                510,
+                290
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "application": "appsjJM3MJXUxWqoi",
+                "table": "Detection-Data",
+                "options": {}
+            },
+            "name": "Airtable",
+            "type": "n8n-nodes-base.airtable",
+            "typeVersion": 1,
+            "position": [
+                700,
+                290
+            ],
+            "credentials": {
+                "airtableApi": "Airtable account"
+            }
+        }
+    ],
+    "connections": {
+        "MQTT Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Set",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Set": {
+            "main": [
+                [
+                    {
+                        "node": "Airtable",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "createdAt": "2021-10-05T20:01:50.703Z",
+    "updatedAt": "2021-10-14T11:01:40.605Z",
+    "settings": {
+        "saveDataErrorExecution": "all",
+        "saveDataSuccessExecution": "all"
+    },
+    "staticData": null
+}
