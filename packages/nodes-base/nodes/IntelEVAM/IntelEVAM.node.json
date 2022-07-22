@@ -1,0 +1,21 @@
+{
+	"node": "n8n-nodes-base.intelevam",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"details": "Intel Edge Video Analytics Microservice allows you to analyse video streams, to detect several objects like person, vehicle, bike etc.",
+	"categories": [
+		"Intel Nodes"
+	],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://github.com/intel/edge-video-analytics-microservice"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://github.com/intel/edge-video-analytics-microservice"
+			}
+		]
+	}
+}

@@ -3,9 +3,9 @@ import {
 	NodePropertyTypes,
 } from 'n8n-workflow';
 
-export class IntelVASApi implements ICredentialType {
-	name = 'intelVASApi';
-	displayName = 'Intel VAS API';
+export class IntelEVAMApi implements ICredentialType {
+	name = 'intelEVAMApi';
+	displayName = 'Intel EVAM API';
 	documentationUrl = 'https://github.com/intel/video-analytics-serving';
 
 	properties = [
@@ -15,7 +15,7 @@ export class IntelVASApi implements ICredentialType {
 			type: 'string' as NodePropertyTypes,
 			default: '',
 			required: true,
-			description : "Host address where VAS is running.",
+			description: "Host address where EVAM is running.",
 		},
 		{
 			displayName: 'Port',
@@ -26,7 +26,7 @@ export class IntelVASApi implements ICredentialType {
 				maxValue: 65535,
 			},
 			required: true,
-			description : "Port address on which VAS is listening.",
+			description: "Port address on which EVAM is listening.",
 		},
 		{
 			displayName: 'MQTT Port',
@@ -37,14 +37,14 @@ export class IntelVASApi implements ICredentialType {
 				maxValue: 65535,
 			},
 			required: true,
-			description : "Port address on which MQTT broker is listening.",
+			description: "Port address on which MQTT broker is listening.",
 		},
 		{
 			displayName: 'MQTT Topic',
 			name: 'mqtt_topic',
 			type: 'string' as NodePropertyTypes,
 			default: 'vaserving',
-			description : "Topic name on which VAS inferences will be published.",
+			description: "Topic name on which EVAM inference will be published.",
 		}
 	];
 

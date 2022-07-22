@@ -16,210 +16,215 @@ import { inherits } from 'util';
 
 const { spawn } = require('child_process');
 
-export class IntelVAS implements INodeType {
+export class IntelEVAM implements INodeType {
 
 	/*
-	* Creating the parameters UI for IntelVAS node. n8n reads
+	* Creating the parameters UI for IntelEVAM node. n8n reads
 	* the following 'description' JSON data. Creates properties
 	* and credentials fields based on this. Also defines name of the Node
 	* and several other metadata for the node, apart from properties and
 	* credentials.
 	*/
-	description : INodeTypeDescription = {
-			displayName: 'Intel RI - VAS',
-			name: 'intelvas',
-			icon: 'file:vasNodeLogo.svg',
-			group: ['transform'],
-			version: 1,
-			description: 'Intel Video Analytics Serving',
-			defaults: {
-				name: 'IntelVAS',
-				color: '#007DC3',
+	description: INodeTypeDescription = {
+		displayName: 'Intel EVAM',
+		name: 'intelevam',
+		icon: 'file:vasNodeLogo.svg',
+		group: ['transform'],
+		version: 1,
+		description: 'Intel Edge Video Analytics Microservice',
+		defaults: {
+			name: 'IntelEVAM',
+			color: '#007DC3',
+		},
+		inputs: ['main'],
+		outputs: ['main'],
+
+		credentials: [
+			{
+				name: 'intelEVAMApi',
+				required: true,
+			}
+		],
+
+		properties: [
+			{
+				displayName: 'EVAM Pipeline',
+				name: 'pipeline',
+				type: 'options',
+
+				options: [
+					{
+						name: 'Detect Person-Vehicle-Bike',
+						value: 'person_vehicle_bike',
+						description: 'Based on person-vehicle-bike-detection-crossroad-0078',
+					},
+					{
+						name: 'Detect Vehicles',
+						value: 'vehicle',
+						description: 'Based on person-vehicle-bike-detection-crossroad-0078',
+					},
+					{
+						name: 'Classify Vehicle Attributes',
+						value: 'object_classification',
+						description: 'Based on person-vehicle-bike-detection-crossroad-0078 and vehicle-attributes-recognition-barrier-0039',
+					},
+					{
+						name: 'Recognise Actions',
+						value: 'action_recognition',
+						description: 'General action recognition based on action-recognition-0001',
+					},
+					{
+						name: 'Track Line Crossing',
+						value: 'object_line_crossing',
+						description: 'Object Tracking pipeline with Line Crossing Tracking module',
+					},
+					{
+						name: 'Detect Audio',
+						value: 'audio_detection',
+						description: 'Environmental sound detection based on Aclnet',
+					},
+				],
+
+				default: '',
+				required: true,
+				description: 'Select a pipeline to run.',
 			},
-			inputs: ['main'],
-			outputs: ['main'],
 
-			credentials: [
-				{
-					name: 'intelVASApi',
-					required: true,
-				}
-			],
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
 
-			properties: [
-				{
-					displayName : 'VAS Pipeline',
-					name : 'pipeline',
-					type : 'options',
-
-					options: [
-						{
-							name : 'Detect Person-Vehicle-Bike',
-							value : 'person_vehicle_bike',
-							description : 'Based on person-vehicle-bike-detection-crossroad-0078',
-						},
-						{
-							name : 'Classify Vehicle Attributes',
-							value : 'object_classification',
-							description : 'Based on person-vehicle-bike-detection-crossroad-0078 and vehicle-attributes-recognition-barrier-0039',
-						},
-						{
-							name : 'Recognise Actions',
-							value : 'action_recognition',
-							description : 'General action recognition based on action-recognition-0001',
-						},
-						{
-							name : 'Track Line Crossing',
-							value : 'object_line_crossing',
-							description : 'Object Tracking pipeline with Line Crossing Tracking module',
-						},
-						{
-							name : 'Detect Audio',
-							value : 'audio_detection',
-							description : 'Environmental sound detection based on Aclnet',
-						},
-					],
-
-					default: '',
-					required: true,
-					description: 'Select a pipeline to run.',
+				displayOptions: {
+					show: {
+						pipeline: [
+							'audio_detection','vehicle', 'person_vehicle_bike', 'object_line_crossing', 'object_classification',
+							'action_recognition',
+						]
+					}
 				},
 
-				{
-					displayName: 'Operation',
-					name: 'operation',
-					type: 'options',
-
-					displayOptions: {
-						show: {
-							pipeline: [
-								'audio_detection', 'person_vehicle_bike', 'object_line_crossing','object_classification',
-								'action_recognition',
-							]
-						}
+				options: [
+					{
+						name: 'Start',
+						value: 'start',
+						description: 'Start a pipeline.',
 					},
+					{
+						name: 'Stop',
+						value: 'stop',
+						description: 'Stop a running pipeline.',
+					},
+					{
+						name: 'Status',
+						value: 'status',
+						description: 'Get the status of a pipeline.',
+					}
+				],
 
-					options: [
-						{
-							name: 'Start',
-							value: 'start',
-							description: 'Start a pipeline.',
-						},
-						{
-							name: 'Stop',
-							value: 'stop',
-							description: 'Stop a running pipeline.',
-						},
-						{
-							name: 'Status',
-							value: 'status',
-							description: 'Get the status of a pipeline.',
-						}
-					],
+				default: '',
+				description: 'The operation to be performed on selected pipeline.',
+			},
 
-					default: '',
-					description: 'The operation to be performed on selected pipeline.',
+			{
+				displayName: 'Video URI',
+				name: 'uri',
+				type: 'string',
+				required: true,
+
+				displayOptions: {
+					show: {
+						operation: [
+							'start'
+						]
+					}
 				},
 
-				{
-					displayName: 'Video URI',
-					name: 'uri',
-					type: 'string',
-					required: true,
+				default: '',
+				description: 'Enter URI for video file. Could be from local file system or a remote server.',
+			},
 
-					displayOptions: {
-						show: {
-							operation: [
-								'start'
-							]
-						}
-					},
+			{
+				displayName: 'Instance ID',
+				name: 'instance_id',
+				type: 'string',
+				required: true,
 
-					default: '',
-					description: 'Enter URI for video file. Could be from local file system or a remote server.',
+				displayOptions: {
+					show: {
+						operation: [
+							'stop', 'status'
+						]
+					}
 				},
 
-				{
-					displayName: 'Instance ID',
-					name: 'instance_id',
-					type: 'string',
-					required: true,
+				default: '',
+				description: 'Provide the instanceID of a running pipline.',
+			},
 
-					displayOptions: {
-						show: {
-							operation: [
-								'stop', 'status'
-							]
-						}
-					},
+			{
+				displayName: 'Additional Parameters',
+				name: 'parameters',
+				type: 'collection',
+				placeholder: 'Add parameter',
+				default: {},
 
-					default: '',
-					description: 'Provide the instanceID of a running pipline.',
+				displayOptions: {
+					show: {
+						operation: ['start'],
+					}
 				},
 
-				{
-					displayName: 'Additional Parameters',
-					name: 'parameters',
-					type: 'collection',
-					placeholder: 'Add parameter',
-					default: {},
-
-					displayOptions: {
-						show: {
-							operation: ['start'],
-						}
+				options: [
+					{
+						displayName: 'Detection Device',
+						name: 'detection_device',
+						type: 'string',
+						default: '',
+						description: "Hardware accelerator to be used for detection.",
 					},
+					{
+						displayName: 'Scaling Method',
+						name: 'scaling_method',
+						type: 'options',
 
-					options: [
-						{
-							displayName: 'Detection Device',
-							name: 'detection_device',
-							type: 'string',
-							default: '',
-							description : "Hardware accelerator to be used for detection.",
-						},
-						{
-							displayName: 'Scaling Method',
-							name: 'scaling_method',
-							type: 'options',
+						options: [
+							{
+								name: 'Bilinear',
+								value: 'bilinear',
+								description: "Bilinear technique for image scaling."
+							},
+							{
+								name: 'Nearest-Neighbour',
+								value: 'nearest-neighbour',
+								description: "Nearest-Neighbour technique for image scaling.",
+							}
+						],
 
-							options : [
-								{
-									name : 'Bilinear',
-									value : 'bilinear',
-									description : "Bilinear technique for image scaling."
-								},
-								{
-									name : 'Nearest-Neighbour',
-									value : 'nearest-neighbour',
-									description : "Nearest-Neighbour technique for image scaling.",
-								}
-							],
-
-							default: 'bilinear',
-							description : "Choose a technique for image scaling.",
-						},
-						{
-							displayName: 'Inference Interval',
-							name: 'inference_interval',
-							type: 'string',
-							default: '',
-							description : 'Choose a time interval between inference updates. ',
-						},
-						{
-							displayName: 'Threshold',
-							name: 'threshold',
-							type: 'string',
-							default: '',
-							description : 'Choose a confidence level for inferences. Between 0-1.'
-						}
-					],
-				}
-			],
+						default: 'bilinear',
+						description: "Choose a technique for image scaling.",
+					},
+					{
+						displayName: 'Inference Interval',
+						name: 'inference_interval',
+						type: 'string',
+						default: '',
+						description: 'Choose a time interval between inference updates. ',
+					},
+					{
+						displayName: 'Threshold',
+						name: 'threshold',
+						type: 'string',
+						default: '',
+						description: 'Choose a confidence level for inferences. Between 0-1.'
+					}
+				],
+			}
+		],
 	};
 
 	/*
-	* Method to be executed each time an IntelVAS node is executed.
+	* Method to be executed each time an IntelEVAM node is executed.
 	*/
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		/**
@@ -234,21 +239,21 @@ export class IntelVAS implements INodeType {
 		const operation = this.getNodeParameter('operation', 0) as string;
 
 		// getting credentials provided by user as an object
-		const credentials = await this.getCredentials ('intelVASApi') as IDataObject;
+		const credentials = await this.getCredentials('intelEVAMApi') as IDataObject;
 
-			/**
-		 * We have different hostname for MQTT broker on dev machine
-		 * and VM instance. Hence, we use environment vars to get
-		 * appropriate hostname for both machines. We set MQTT_HOST var
-		 * on both machines. If var is not set we consider MQTT to be
-		 * running on same host, on which VAS is running.
-		 */
+		/**
+	 * We have different hostname for MQTT broker on dev machine
+	 * and VM instance. Hence, we use environment vars to get
+	 * appropriate hostname for both machines. We set MQTT_HOST var
+	 * on both machines. If var is not set we consider MQTT to be
+	 * running on same host, on which VAS is running.
+	 */
 
 		const MQTT_HOST = ("MQTT_HOST" in process.env) ? process.env.MQTT_HOST : credentials.vas_host;
 
 		let api_response;	// stores response data from VAS API
 		let node_response = []; // stores the n8n node output, displayed to user after execution finishes.
-		let body_payload : IDataObject; // parameters to be sent as HTTP request to VAS API
+		let body_payload: IDataObject; // parameters to be sent as HTTP request to VAS API
 		var request_to_rest_api;
 
 		/*
@@ -259,23 +264,21 @@ export class IntelVAS implements INodeType {
 			switch (pipeline_name) {
 				case 'person_vehicle_bike':
 					return 'object_detection/person_vehicle_bike' as string;
-					break;
+				
+				case 'vehicle':
+					return 'object_detection/vehicle' as string;
 
 				case 'audio_detection':
 					return 'audio_detection/environment' as string;
-					break;
 
 				case 'object_line_crossing':
 					return 'object_tracking/object_line_crossing' as string;
-					break;
 
 				case 'object_classification':
 					return 'object_classification/vehicle_attributes' as string;
-					break;
 
 				case 'action_recognition':
 					return 'action_recognition/general' as string;
-					break;
 
 				default:
 					return '';
@@ -288,7 +291,7 @@ export class IntelVAS implements INodeType {
 		* the string returned by getEndpoint() function.
 		*/
 		const api_base_url = "http://" + credentials.vas_host + ":" + credentials.vas_port + "/pipelines/";
-		const api_endpoint = api_base_url + getEndpoint (pipeline);
+		const api_endpoint = api_base_url + getEndpoint(pipeline);
 
 		/**
 		 * We need to start execution of VAS node for each input item we are
@@ -319,23 +322,23 @@ export class IntelVAS implements INodeType {
 				* Format of paramters is based on REST API provided by VAS.
 				*/
 				body_payload = {
-					source : {
-						uri : video_uri,
-						type : "uri",
+					source: {
+						uri: video_uri,
+						type: "uri",
 					},
-					destination : {
-						metadata : {
-							type : "mqtt",
-							host : mqtt_host_port,
-							topic : credentials.mqtt_topic,
+					destination: {
+						metadata: {
+							type: "mqtt",
+							host: mqtt_host_port,
+							topic: credentials.mqtt_topic,
 						},
-						frame : {
-							type : "rtsp",
-							path : "detection",
+						frame: {
+							type: "rtsp",
+							path: "detection",
 						}
 					},
 
-					parameters : {}, // keep it empty. assign properties based on additional parameters.
+					parameters: {}, // keep it empty. assign properties based on additional parameters.
 				}
 
 				/*
@@ -344,35 +347,35 @@ export class IntelVAS implements INodeType {
 				* add it to 'parameters' properties in body_payload.
 				*/
 				if (additional_field.detection_device !== undefined) {
-					const detection_device : IDataObject = {
-						"device" :  additional_field.detection_device,
+					const detection_device: IDataObject = {
+						"device": additional_field.detection_device,
 					};
 
-					Object.assign (body_payload.parameters, detection_device);
+					Object.assign(body_payload.parameters, detection_device);
 				}
 
 				if (additional_field.scaling_method !== undefined) {
-					const scaling_method : IDataObject = {
-						"scale_method" : additional_field.scaling_method,
+					const scaling_method: IDataObject = {
+						"scale_method": additional_field.scaling_method,
 					};
 
-					Object.assign (body_payload.parameters, scaling_method);
+					Object.assign(body_payload.parameters, scaling_method);
 				}
 
 				if (additional_field.inference_interval !== undefined) {
-					const inference_interval : IDataObject = {
-						"inference-interval": parseInt (additional_field.inference_interval as string),
+					const inference_interval: IDataObject = {
+						"inference-interval": parseInt(additional_field.inference_interval as string),
 					};
 
-					Object.assign (body_payload.parameters, inference_interval);
+					Object.assign(body_payload.parameters, inference_interval);
 				}
 
 				if (additional_field.threshold !== undefined) {
-					const threshold : IDataObject = {
-						"threshold" : Number (additional_field.threshold as string),
+					const threshold: IDataObject = {
+						"threshold": Number(additional_field.threshold as string),
 					};
 
-					Object.assign (body_payload.parameters, threshold);
+					Object.assign(body_payload.parameters, threshold);
 				}
 
 				/**
@@ -380,10 +383,10 @@ export class IntelVAS implements INodeType {
 				 * to start the pipeline.
 				 */
 				request_to_rest_api = {
-					method : 'POST',
-					body : body_payload,
-					uri : api_endpoint,
-					json : true,
+					method: 'POST',
+					body: body_payload,
+					uri: api_endpoint,
+					json: true,
 				} as OptionsWithUri;
 			}
 
@@ -400,8 +403,8 @@ export class IntelVAS implements INodeType {
 
 				// prepare the request to be sent to VAS API to stop pipeline
 				request_to_rest_api = {
-					method : 'DELETE',
-					uri : endpoint_to_stop_instance,
+					method: 'DELETE',
+					uri: endpoint_to_stop_instance,
 				} as OptionsWithUri;
 			}
 
@@ -416,8 +419,8 @@ export class IntelVAS implements INodeType {
 
 				// prepare the request to be sent to VAS API to get status of pipeline
 				request_to_rest_api = {
-					method : 'GET',
-					uri : endpoint_to_get_status,
+					method: 'GET',
+					uri: endpoint_to_get_status,
 				} as OptionsWithUri;
 			}
 
@@ -429,8 +432,8 @@ export class IntelVAS implements INodeType {
 			 * */
 			if (operation === 'start') {
 				const json_response = {
-					id : api_response,
-					instance_status : 'CREATED',
+					id: api_response,
+					instance_status: 'CREATED',
 				}
 
 				api_response = json_response;
@@ -463,13 +466,13 @@ export class IntelVAS implements INodeType {
 			 */
 			if (operation === 'stop') {
 				if (api_response.state !== 'COMPLETED' && api_response.state !== 'ERROR') {
-					Object.assign(api_response, {stop_request: 'SUCCESS'});
+					Object.assign(api_response, { stop_request: 'SUCCESS' });
 				}
 			}
 
 			/**
 			 * Add the formatted response to the 'node_response' array which will be
-			 * available as the IntelVAS node output in n8n UI.
+			 * available as the IntelEVAM node output in n8n UI.
 			 */
 			node_response.push(api_response);
 
