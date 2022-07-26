@@ -31,9 +31,9 @@ export class Function implements INodeType {
 
 				options : [
 					{
-						name: 'Custom Operation',
-						value: 'custom',
-						description: 'Write custom javascript code to suit your requirements.'
+						name: 'Detect Collision',
+						value: 'detect_collision',
+						description: 'Detect any vehicle collision in a video.',
 					},
 					{
 						name: 'Count People',
@@ -49,6 +49,11 @@ export class Function implements INodeType {
 						name: 'Count Bikes',
 						value: 'count_bikes',
 						description: 'Count the number of bikes in a video.',
+					},
+					{
+						name: 'Custom Operation',
+						value: 'custom',
+						description: 'Write custom javascript code to suit your requirements.'
 					}
 				],
 
@@ -110,14 +115,16 @@ const getCount = (elem) => {
 for (item of items) {
 	count = 0;
 	let lp = "person_count";
-	const src = item.json.source;
+	const message = JSON.parse(item.json.message);
+	const src = message.source;
 	const video = src.substr(src.lastIndexOf('/') + 1, src.length)
-	item.json.objects.forEach(getCount);
+	console.log(video);
+	message.objects.forEach(getCount);
 	lp = lp + ",video_src=\\"" + video + "\\"";
 	lp = lp + " " + "num_of_person=" + count;
 	res.push({json: {lp_string: lp, people_count: count}});
 }
-return res;
+return res;				
 				`,
 				description: 'The JavaScript code to execute to count number of people in VAS output.',
 				noDataExpression: true,
@@ -139,22 +146,25 @@ return res;
 				},
 				type: 'string',
 				default: `/* Counting vehicles from Intel VAS inference */
+
 let count=0;
 let res = [];
 const getCount = (elem) => {
-		if(elem.detection.label_id === 2) {
-				count++;
-		}
+	if(elem.detection.label_id === 2) {
+			count++;
+	}
 };
 for (item of items) {
 	count = 0;
 	let lp = "vehicle_count";
-	const src = item.json.source;
+	const message = JSON.parse(item.json.message);
+	const src = message.source;
 	const video = src.substr(src.lastIndexOf('/') + 1, src.length)
-	item.json.objects.forEach(getCount);
+	console.log(video);
+	message.objects.forEach(getCount);
 	lp = lp + ",video_src=\\"" + video + "\\"";
 	lp = lp + " " + "num_of_vehicle=" + count;
-	res.push({json: {lp_string: lp}});
+	res.push({json: {lp_string: lp, vehicle_count: count}});
 }
 return res;
 				`,
@@ -187,9 +197,11 @@ const getCount = (elem) => {
 for (item of items) {
 	count = 0;
 	let lp = "bike_count";
-	const src = item.json.source;
+	const message = JSON.parse(item.json.message);
+	const src = message.source;
 	const video = src.substr(src.lastIndexOf('/') + 1, src.length)
-	item.json.objects.forEach(getCount);
+	console.log(video);
+	message.objects.forEach(getCount);
 	lp = lp + ",video_src=\\"" + video + "\\"";
 	lp = lp + " " + "num_of_bike=" + count;
 	res.push({json: {lp_string: lp}});
@@ -197,6 +209,80 @@ for (item of items) {
 return res;
 				`,
 				description: 'The JavaScript code to execute to count number of bikes in VAS output.',
+				noDataExpression: true,
+			},
+
+			{
+				displayName: 'Code Snippet for detecting vehicle collisions',
+				name: 'functionCodeCollision',
+				typeOptions: {
+					alwaysOpenEditWindow: true,
+					editor: 'code',
+					rows: 100,
+				},
+				displayOptions: {
+					show: {
+						operation: ['detect_collision'],
+					}
+				},
+				type: 'string',
+				default: `/* Detect vehicle collisions */
+let res = [];
+const getBboxes = (data) => {
+	let arrBbox = [];
+	const extractBoxes = (vehicle) => {
+		arrBbox.push(vehicle.detection.bounding_box)
+	}
+	data.objects.forEach(extractBoxes);
+	return arrBbox;
+}
+
+const getDistance = (pointA, pointB) => {
+	return Math.sqrt(Math.pow(pointB.x - pointA.x, 2) + (Math.pow(pointB.y - pointA.y, 2)))
+}
+
+const getDistanceMatrix = (centroidA, centroidB) => {
+	let distances = [];
+	for (const pointA of centroidA) {
+		let row = [];
+		for (const pointB of centroidB) {
+			row.push(getDistance (pointA, pointB))
+		}
+		distances.push(row);
+	}
+	return distances;
+}
+
+for (item of items) {
+	const data = JSON.parse(item.json.message);
+	const bbox = getBboxes(data);
+
+	let widths = [];
+	let centroids = [];
+	for ( const elem of bbox ) {
+	widths.push (Math.min(elem.x_max - elem.x_min, elem.y_max - elem.y_min));
+	centroids.push({ x : elem.x_min + (elem.x_max - elem.x_min)/2 , y : elem.y_min + (elem.y_max - elem.y_min)/2 });
+	}
+
+	const distance = getDistanceMatrix(centroids, centroids);
+
+	const count = centroids.length; 
+	let collisions = [];
+	for (let i = 0; i < count; i++) {
+	for (let j = i + 1; j < count; j++) {
+		smallerWidth = Math.min(widths[i], widths[j]);
+		if (distance[i][j] < smallerWidth) {
+			collisions.push([i, j]); 
+		}
+	}
+	}
+
+	res.push( {json: {vehicle_count: count, collision_count: collisions.length}} );
+}
+
+return res;
+				`,
+				description: 'The JavaScript code to execute to detect vehicle collision in a video.',
 				noDataExpression: true,
 			},
 
@@ -278,6 +364,9 @@ return res;
 		}
 		else if (operation === 'count_bikes') {
 			functionCode = this.getNodeParameter('functionCodeBike', 0) as string;
+		}
+		else if (operation === 'detect_collision') {
+			functionCode = this.getNodeParameter('functionCodeCollision', 0) as string;
 		}
 		else {
 			functionCode = this.getNodeParameter('functionCodeCustom', 0) as string;
