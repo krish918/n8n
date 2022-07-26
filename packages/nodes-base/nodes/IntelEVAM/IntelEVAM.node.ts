@@ -264,7 +264,7 @@ export class IntelEVAM implements INodeType {
 			switch (pipeline_name) {
 				case 'person_vehicle_bike':
 					return 'object_detection/person_vehicle_bike' as string;
-				
+
 				case 'vehicle':
 					return 'object_detection/vehicle' as string;
 
@@ -333,8 +333,8 @@ export class IntelEVAM implements INodeType {
 							topic: credentials.mqtt_topic,
 						},
 						frame: {
-							type: "rtsp",
-							path: "detection",
+							type: "webrtc",
+							"peer-id": "peerid_1"
 						}
 					},
 
