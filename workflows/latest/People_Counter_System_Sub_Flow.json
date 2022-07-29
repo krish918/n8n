@@ -1,0 +1,167 @@
+{
+  "name": "People Counter System Sub-Flow",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        400,
+        2140
+      ]
+    },
+    {
+      "parameters": {
+        "topics": "vaserving/db",
+        "options": {}
+      },
+      "name": "MQTT Trigger",
+      "type": "n8n-nodes-base.mqttTrigger",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        700
+      ],
+      "credentials": {
+        "mqtt": {
+          "id": "2",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "http://localhost:8086/api/v2/write",
+        "allowUnauthorizedCerts": true,
+        "jsonParameters": true,
+        "options": {
+          "bodyContentType": "raw"
+        },
+        "bodyParametersJson": "={{$json[\"lp_string\"]}}",
+        "headerParametersJson": "={{ {\"Authorization\": \"Token x8L2TK0r0Wj7uLWZ5VpL2pMgF7tuBbLaClGyzMNNiTei4K7xIxKl6y3lXVEBgjreNv1Ws8K7PMChI_u4se7UZQ==\"} }}",
+        "queryParametersJson": "={{ {\"org\":\"intel\", \"bucket\": \"vas\"} }}"
+      },
+      "name": "Send to InfluxDB1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        140,
+        840
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "count_people",
+        "functionCodePeople": "/* Counting people from Intel EVAM inference */\nlet count=0;\nlet res = [];\nconst getCount = (elem) => {\n\tif(elem.detection.label_id === 1) {\n\t\t\tcount++;\n\t}\n};\nfor (item of items) {\n\tcount = 0;\n\tlet lp = \"person_count\";\n\tconst message = JSON.parse(item.json.message);\n\tconst src = message.source;\n\tconst video = src.substr(src.lastIndexOf('/') + 1, src.length)\n\tconsole.log(video);\n\tmessage.objects.forEach(getCount);\n\tlp = lp + \",video_src=\\\"\" + video + \"\\\"\";\n\tlp = lp + \" \" + \"num_of_person=\" + count;\n\tres.push({json: {lp_string: lp, people_count: count}});\n}\nreturn res;\n\t\t\t\t"
+      },
+      "name": "Count People",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "message": "={{ \"COVID-19 ALERT: The place is crowded with approx \" + $json[\"people_count\"] + \" people.\"}}",
+        "additionalFields": {}
+      },
+      "name": "SIGNL4",
+      "type": "n8n-nodes-base.signl4",
+      "typeVersion": 1,
+      "position": [
+        440,
+        400
+      ],
+      "credentials": {
+        "signl4Api": {
+          "id": "3",
+          "name": "SIGNL4 Webhook account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "name": "NoOp1",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        440,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json[\"people_count\"]}}",
+              "operation": "largerEqual",
+              "value2": 3
+            }
+          ]
+        }
+      },
+      "name": "If the place is Crowded",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        140,
+        520
+      ]
+    }
+  ],
+  "connections": {
+    "MQTT Trigger": {
+      "main": [
+        [
+          {
+            "node": "Count People",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Count People": {
+      "main": [
+        [
+          {
+            "node": "Send to InfluxDB1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If the place is Crowded",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If the place is Crowded": {
+      "main": [
+        [
+          {
+            "node": "SIGNL4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "NoOp1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "id": 13
+}

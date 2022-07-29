@@ -1,0 +1,52 @@
+{
+  "name": "Detect Vehicles",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        300,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "pipeline": "vehicle",
+        "operation": "start",
+        "uri": "file:///tmp/accident.avi",
+        "parameters": {}
+      },
+      "name": "Detect Vehicles",
+      "type": "n8n-nodes-base.intelevam",
+      "typeVersion": 1,
+      "position": [
+        640,
+        300
+      ],
+      "credentials": {
+        "intelEVAMApi": {
+          "id": "10",
+          "name": "EVAM - ITM Account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Detect Vehicles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "id": 7
+}

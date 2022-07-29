@@ -1,0 +1,106 @@
+{
+  "name": "People Counter System Main Flow",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        180,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "functionCodeCustom": "/* To be written in Javascript */\n// Code here will run only once, no matter how many input items there are.\n// More info and help: https://docs.n8n.io/nodes/n8n-nodes-base.function\n// Loop over inputs and add a new field called 'myNewField' to the JSON of each one\nlet res = []\nfor (item of items) {\n  let lp = \"pipeline\";\n  lp = lp + \" pipeline_id=\\\"\" + item.json.id + \"\\\"\";\n  res.push({json : {lp_string: lp}})\n}\n\nreturn res;"
+      },
+      "name": "Create LP Query",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        600,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "http://localhost:8086/api/v2/write",
+        "jsonParameters": true,
+        "options": {
+          "bodyContentType": "raw"
+        },
+        "bodyParametersJson": "={{$json[\"lp_string\"]}}",
+        "headerParametersJson": "={{ {\"Authorization\": \"Token x8L2TK0r0Wj7uLWZ5VpL2pMgF7tuBbLaClGyzMNNiTei4K7xIxKl6y3lXVEBgjreNv1Ws8K7PMChI_u4se7UZQ==\"} }}",
+        "queryParametersJson": "={{ {\"org\":\"intel\", \"bucket\": \"vas\"} }}"
+      },
+      "name": "Pipeline ID to influxDB",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        820,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "pipeline": "person_vehicle_bike",
+        "operation": "start",
+        "uri": "file:///tmp/traffic.mp4",
+        "parameters": {}
+      },
+      "name": "IntelEVAM",
+      "type": "n8n-nodes-base.intelevam",
+      "typeVersion": 1,
+      "position": [
+        400,
+        180
+      ],
+      "credentials": {
+        "intelEVAMApi": {
+          "id": "9",
+          "name": "Intel EVAM account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "IntelEVAM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create LP Query": {
+      "main": [
+        [
+          {
+            "node": "Pipeline ID to influxDB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IntelEVAM": {
+      "main": [
+        [
+          {
+            "node": "Create LP Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "id": 1
+}

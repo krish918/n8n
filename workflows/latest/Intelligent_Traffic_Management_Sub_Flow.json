@@ -1,0 +1,173 @@
+{
+  "name": "Intelligent Traffic Management Sub Flow",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        -760,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "topics": "evam/itm",
+        "options": {}
+      },
+      "name": "MQTT Trigger",
+      "type": "n8n-nodes-base.mqttTrigger",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        300
+      ],
+      "credentials": {
+        "mqtt": {
+          "id": "2",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json[\"collision_count\"]}}",
+              "operation": "largerEqual",
+              "value2": 1
+            }
+          ]
+        }
+      },
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "message": "EMERGENCY ALERT : A vehicle collision occurred.",
+        "additionalFields": {}
+      },
+      "name": "SIGNL4",
+      "type": "n8n-nodes-base.signl4",
+      "typeVersion": 1,
+      "position": [
+        240,
+        180
+      ],
+      "credentials": {
+        "signl4Api": {
+          "id": "3",
+          "name": "SIGNL4 Webhook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "detect_collision"
+      },
+      "name": "Detect Collision",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "count_vehicles",
+        "functionCodeVehicle": "/* Counting vehicles from Intel VAS inference */\n\nlet count=0;\nlet res = [];\nconst getCount = (elem) => {\n\tif(elem.detection.label_id === 0) {\n\t\t\tcount++;\n\t}\n};\nfor (item of items) {\n\tcount = 0;\n\tlet lp = \"vehicle_count\";\n\tconst message = JSON.parse(item.json.message);\n\tconst src = message.source;\n\tconst video = src.substr(src.lastIndexOf('/') + 1, src.length)\n\tconsole.log(video);\n\tmessage.objects.forEach(getCount);\n\tlp = lp + \",video_src=\\\"\" + video + \"\\\"\";\n\tlp = lp + \" \" + \"num_of_vehicle=\" + count;\n\tres.push({json: {lp_string: lp, vehicle_count: count}});\n}\nreturn res;\n\t\t\t\t"
+      },
+      "name": "Count Vehicles",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "http://localhost:8086/api/v2/write",
+        "allowUnauthorizedCerts": true,
+        "jsonParameters": true,
+        "options": {
+          "bodyContentType": "raw"
+        },
+        "bodyParametersJson": "={{$json[\"lp_string\"]}}",
+        "headerParametersJson": "={{ {\"Authorization\": \"Token x8L2TK0r0Wj7uLWZ5VpL2pMgF7tuBbLaClGyzMNNiTei4K7xIxKl6y3lXVEBgjreNv1Ws8K7PMChI_u4se7UZQ==\"} }}",
+        "queryParametersJson": "={{ {\"org\":\"intel\", \"bucket\": \"vas\"} }}"
+      },
+      "name": "Send to InfluxDB1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        520
+      ]
+    }
+  ],
+  "connections": {
+    "MQTT Trigger": {
+      "main": [
+        [
+          {
+            "node": "Detect Collision",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Count Vehicles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "SIGNL4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect Collision": {
+      "main": [
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Count Vehicles": {
+      "main": [
+        [
+          {
+            "node": "Send to InfluxDB1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "id": 8
+}
